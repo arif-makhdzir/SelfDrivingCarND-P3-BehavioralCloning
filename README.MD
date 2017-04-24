@@ -104,11 +104,28 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+<h5>Chosing model</h5>
+My first step was to use a convolution neural network model similar to the Comma.AI's end-to-end self driving car convnet: https://github.com/commaai/research/blob/master/train_steering_model.py 
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+I chose Comma.AI's model as it is a proven model that functions perfectly on a similar image input - in terms of size and features in the image.
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+<h5>Preprocessing</h5>
+From experience past models and outlined in the lectures..
+
+<h5>First training attempt and evaluation</h5>
+In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set, with 80/20 split. I trained my model with Udacity's dataset, using Adam Optimizer (lr=xxx) with batch size of 32 for 5 epochs. The end result is 0.2 loss on trainng set and 0.27 loss on validation set. I ran my model on the test track and it failed on second turn. I think in the first place the model is underfitting, I need the training set loss to be lower (less than 0.05).
+
+From inspection of Udacity's dataset, I find that quite a bit of the data are just going straight (steering angle of 0). The model needs to learn turning better, thus we need more data that contains non zero steering angle.
+
+<h5>Adding left & right images data into the sample set</h5>
+Steering angle co-efficient table
+
+Test and failed on right turn
+data with minus steering coffecient
+
+<h5>Flip horizontal & drive reverse track</h5>
+
+I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
 To combat the overfitting, I modified the model so that ...
 
