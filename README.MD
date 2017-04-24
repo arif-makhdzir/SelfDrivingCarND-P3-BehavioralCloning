@@ -49,11 +49,13 @@ The model.py file contains the code for training and saving the convolution neur
 
 <h4>1. An appropriate model architecture has been employed</h4>
 My model is based on Comma.AI's end-to-end self driving car convolution neural network: https://github.com/commaai/research/blob/master/train_steering_model.py 
-https://arxiv.org/pdf/1608.01230.pdf
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+I chose Comma.AI's model as it is a proven model that functions perfectly on a similar image input - in terms of size and features in the image.
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+Pre-processing
+1. Cropping - Cut 70px top and 25px bottom. Rational: Unneeded area for learning, sky & hood, trees, make image smaller, faster training. and allow model to focus on what's important (the road & lines)
+2. Resize - Resize to 160x40. Make smaller faster to train, and fits into the comma.ai model
+3. Normalized - (x/255.0) - 0.5 to get mean close to 0, make model learns better and faster.
 
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
@@ -71,6 +73,14 @@ The model includes RELU layers to introduce nonlinearity (code line 20), and the
 | ELU					|		
 | Dropout	| Keep probability = 0.5        									|
 | Fully connected		| Output = 1       									|
+
+Augmentation
+1. Using left & right images - steering coefficient of 0.229(+/-). This helps the model to learn how to steer to middle when its off center, this fakes a situation of return to center from the side.
+2. Flip image horizontally on odd frame count - for every odd frame I flip image horizontally and change the sign of the steering angle. This helps the model to generalize to steering magnitude, not always turn left. generalize turning left & right. Since the track is counter clokwise with lots of left turns, required to learn right turn. Even though drive clockwise, still help to generalize.
+
+Driving strategy
+1. Off center move to center
+2. Drive reverse track, more right turn. problem first time turn right kelaut.
 
 ####2. Attempts to reduce overfitting in the model
 
