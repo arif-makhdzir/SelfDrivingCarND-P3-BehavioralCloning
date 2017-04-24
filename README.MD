@@ -82,17 +82,19 @@ Driving strategy
 1. Off center move to center
 2. Drive reverse track, more right turn. problem first time turn right kelaut.
 
-####2. Attempts to reduce overfitting in the model
+<h4>2. Attempts to reduce overfitting in the model</h4>
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+i) The model contains dropout layers after the two fully connected layers in order to reduce overfitting (model.py lines 21). 
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+ii) The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16 for training & validation set split). 
 
-####3. Model parameter tuning
+iii) The track is counter clockwise, so there are way more left turns than right turns. In order to combat the model from overfitting to left turn steering action, flip horizontal data augmentation technique was used and driving the track reverse to capture more right turn data was done.
+
+<h4>3. Model parameter tuning</h4>
 
 The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
 
-####4. Appropriate training data
+<h4>4. Appropriate training data</h4>
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
