@@ -131,6 +131,15 @@ I augment the data by adding the left & right image data into the sample set. No
 Result: Model is able to drive all left turn without problem, however when it encounters right turn it drives off the track. This means my model is not generalizing to turning right well-enough, so I need to augment/add more turning right data.
 
 <h5>Flip horizontal & drive reverse track</h5>
+1. Flip horizontal
+In order to augment the data to get more right turns, I flip the image horizontal for every odd frame and reverse the steering co-efficient sign (line xx).
+
+2. Drive reverse track
+I collect more data of me drivign reverse track so that I get more right turn data point.
+
+Model drives perfectly around the track for many laps.
+
+----------------------------------------------------------
 
 I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
