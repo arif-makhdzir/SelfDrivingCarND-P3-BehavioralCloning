@@ -74,9 +74,9 @@ For my own training data, I used mainly a combination of center lane driving, re
 
 For details about how I created the training data, see the next section. 
 
-###Model Architecture and Training Strategy
+<h2>#Model Architecture and Training Strategy</h2>
 
-####1. Solution Design Approach
+<h3>1. Solution Design Approach</h3>
 
 <h5>Chosing model</h5>
 My first step was to use a convolution neural network model similar to the Comma.AI's end-to-end self driving car convnet: https://github.com/commaai/research/blob/master/train_steering_model.py 
@@ -86,10 +86,11 @@ I chose Comma.AI's model as it is a proven model that functions perfectly on a s
 Note that Comma.AI's model already has dropout layers, so I just copy them and use the same keep probability hyperparameter
 
 <h5>Preprocessing</h5>
-1. First thing to do (as outlined in the lecture) is to normalize the images. This is done by adding a lambda layer that does the following operation: (x/255.0) - 0.5 (line 128)
-2. Then I crop the top of the mage by 75px and bottom 20px. The reason to do is that those top and bottom ares areas of the image that won't help with the model to learn how to steer the car (i.e. sky & hood, trees). The advatange of doing this is that it makes the images smaller, thus we will get faster training.
+1. I crop the top of the image by 70px and bottom 25px. The reason to do is that those top and bottom areas of the image won't help with the model to learn how to steer the car (i.e. sky & hood, trees), so by cropping them out the model can focus on what's important: Just the road. The advatange of doing this is that it makes the images smaller, thus we will get faster training.
 <img src="writeup_images/original_image.png">
 <img src="writeup_images/cropped_image.png">
+2. Then I resize the image to 160x40. The reason to do this is to speed up the training.
+3. Lastly I normalize the images, by now this is alredy second nature to me when I deal with convnet for images. This is done by adding a lambda layer that does the following operation: (x/255.0) - 0.5 (line 128)
 
 <h5>First training attempt and evaluation</h5>
 In order to gauge how well the model was working, I split my data set into training and validation set, with 80/20 split. I trained my model with Udacity's dataset, using Adam Optimizer (lr=0.0001) with batch size of 32 for 5 epochs. The end result was 0.2 loss on trainng set and 0.27 loss on validation set. I ran my model on the test track and it failed on the second turn. The model is underfitting, I need the training set loss to be lower (less than 0.05).
@@ -117,25 +118,14 @@ These data helps..
 <h5>Flip horizontal & drive reverse track</h5>
 1. Flip horizontal
 In order to augment the data to get more right turns, I flip the image horizontal for every odd frame and reverse the steering co-efficient sign (line xx).
-
+<img src="writeup_images/turn_left_image.png">
+<img src="writeup_images/flipped_turn_left_image.png">
 2. Drive reverse track
 I collect more data of me drivign reverse track so that I get more right turn data point.
 
-Model drives perfectly around the track for many laps.
-
-----------------------------------------------------------
-
-I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
-
-To combat the overfitting, I modified the model so that ...
-
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
-####2. Final Model Architecture
+<h3>2. Final Model Architecture</h3>
 
 The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
 
@@ -160,7 +150,7 @@ The final model architecture (model.py lines 18-24) consisted of a convolution n
 
 ![alt text][image1]
 
-####3. Creation of the Training Set & Training Process
+<h3>3. Creation of the Training Set & Training Process</h3>
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
