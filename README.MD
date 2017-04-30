@@ -54,36 +54,6 @@ I chose Comma.AI's model as it is a proven model that functions perfectly on a s
 
 For the final model architecture, see next section.
 
-Pre-processing
-1. Cropping - Cut 70px top and 25px bottom. Rational: Unneeded area for learning, sky & hood, trees, make image smaller, faster training. and allow model to focus on what's important (the road & lines)
-2. Resize - Resize to 160x40. Make smaller faster to train, and fits into the comma.ai model
-3. Normalized - (x/255.0) - 0.5 to get mean close to 0, make model learns better and faster.
-
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 160x40x3 RGB image   							| 
-| Convolution 8x8     	| 4x4 stride, same padding, depth of 16 	|
-| ELU					|												|
-| Convolution 5x5     	| 2x2 stride, same padding, depth of 32 	|
-| ELU					|												|
-| Convolution 5x5     	| 2x2 stride, same padding, depth of 64 	|
-| Flatten	      	|  				|
-| Dropout		| Keep probability = 0.2       									|
-| ELU					|				|
-| Fully connected		| Output = 512        									|
-| Dropout		| Keep probability = 0.5       									|
-| ELU					|		
-| Dropout	| Keep probability = 0.5        									|
-| Fully connected		| Output = 1       									|
-
-Augmentation
-1. Using left & right images - steering coefficient of 0.229(+/-). This helps the model to learn how to steer to middle when its off center, this fakes a situation of return to center from the side.
-2. Flip image horizontally on odd frame count - for every odd frame I flip image horizontally and change the sign of the steering angle. This helps the model to generalize to steering magnitude, not always turn left. generalize turning left & right. Since the track is counter clokwise with lots of left turns, required to learn right turn. Even though drive clockwise, still help to generalize.
-
-Driving strategy
-1. Off center move to center
-2. Drive reverse track, more right turn. problem first time turn right kelaut.
-
 <h4>2. Attempts to reduce overfitting in the model</h4>
 
 i) The model contains dropout layers after the two fully connected layers in order to reduce overfitting (model.py lines 21). 
@@ -100,7 +70,7 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 
 Training data was chosen to keep the vehicle driving on the road. Firstly I combine Udacity's dataset with my own training data in order to come up with the final data set.
 
-For my own training data, I used mainly a combination of center recovering from the left and right sides of the road and reverse track driving. These training data compliments Udacity's dataset well. 
+For my own training data, I used mainly a combination of center lane driving, recovering from the left and right sides of the road, and reverse track driving. These training data compliments Udacity's dataset well. 
 
 For details about how I created the training data, see the next section. 
 
@@ -116,7 +86,10 @@ I chose Comma.AI's model as it is a proven model that functions perfectly on a s
 Note that Comma.AI's model already has dropout layers, so I just copy them and use the same keep probability hyperparameter
 
 <h5>Preprocessing</h5>
-First thing to do (as outlined in the lecture) is to normalize the images. This is done by adding a lambda layer that does the following operation: (x/255.0) - 0.5 (line 128)
+1. First thing to do (as outlined in the lecture) is to normalize the images. This is done by adding a lambda layer that does the following operation: (x/255.0) - 0.5 (line 128)
+2. Then I crop the top of the mage by 75px and bottom 20px. The reason to do is that those top and bottom ares areas of the image that won't help with the model to learn how to steer the car (i.e. sky & hood, trees). The advatange of doing this is that it makes the images smaller, thus we will get faster training.
+<img src="writeup_images/original_image.png">
+<img src="writeup_images/cropped_image.png">
 
 <h5>First training attempt and evaluation</h5>
 In order to gauge how well the model was working, I split my data set into training and validation set, with 80/20 split. I trained my model with Udacity's dataset, using Adam Optimizer (lr=0.0001) with batch size of 32 for 5 epochs. The end result was 0.2 loss on trainng set and 0.27 loss on validation set. I ran my model on the test track and it failed on the second turn. The model is underfitting, I need the training set loss to be lower (less than 0.05).
@@ -193,13 +166,13 @@ To capture good driving behavior, I first recorded two laps on track one using c
 
 ![alt text][image2]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recover if it strays from center of the lane. These images show what a recovery looks like starting from right side :
 
 ![alt text][image3]
 ![alt text][image4]
 ![alt text][image5]
 
-Then I repeated this process on track two in order to get more data points.
+I also do reverse track driving to get more right turn data.
 
 To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
 
@@ -215,3 +188,35 @@ I finally randomly shuffled the data set and put Y% of the data into a validatio
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
+
+
+-----------------
+Pre-processing
+1. Cropping - Cut 70px top and 25px bottom. Rational: Unneeded area for learning, sky & hood, trees, make image smaller, faster training. and allow model to focus on what's important (the road & lines)
+2. Resize - Resize to 160x40. Make smaller faster to train, and fits into the comma.ai model
+3. Normalized - (x/255.0) - 0.5 to get mean close to 0, make model learns better and faster.
+
+| Layer         		|     Description	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| Input         		| 160x40x3 RGB image   							| 
+| Convolution 8x8     	| 4x4 stride, same padding, depth of 16 	|
+| ELU					|												|
+| Convolution 5x5     	| 2x2 stride, same padding, depth of 32 	|
+| ELU					|												|
+| Convolution 5x5     	| 2x2 stride, same padding, depth of 64 	|
+| Flatten	      	|  				|
+| Dropout		| Keep probability = 0.2       									|
+| ELU					|				|
+| Fully connected		| Output = 512        									|
+| Dropout		| Keep probability = 0.5       									|
+| ELU					|		
+| Dropout	| Keep probability = 0.5        									|
+| Fully connected		| Output = 1       									|
+
+Augmentation
+1. Using left & right images - steering coefficient of 0.229(+/-). This helps the model to learn how to steer to middle when its off center, this fakes a situation of return to center from the side.
+2. Flip image horizontally on odd frame count - for every odd frame I flip image horizontally and change the sign of the steering angle. This helps the model to generalize to steering magnitude, not always turn left. generalize turning left & right. Since the track is counter clokwise with lots of left turns, required to learn right turn. Even though drive clockwise, still help to generalize.
+
+Driving strategy
+1. Off center move to center
+2. Drive reverse track, more right turn. problem first time turn right kelaut.
