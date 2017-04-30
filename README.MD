@@ -115,7 +115,7 @@ First thing to do (as outlined in the lecture) is to normalize the images. This 
 <h5>First training attempt and evaluation</h5>
 In order to gauge how well the model was working, I split my data set into training and validation set, with 80/20 split. I trained my model with Udacity's dataset, using Adam Optimizer (lr=0.0001) with batch size of 32 for 5 epochs. The end result was 0.2 loss on trainng set and 0.27 loss on validation set. I ran my model on the test track and it failed on the second turn. The model is underfitting, I need the training set loss to be lower (less than 0.05).
 
-There are two ways to combat underfitting, one way is to have more useful data or to reduce the size of the model. The latter is not an option, as the model is of the right size for this problem, so I decided to focus on improving the data set.
+There are two ways to combat underfitting, one way is to have more useful data or to reduce the size of the model. The latter is not an option, as the model is of the right size for this problem, so I decided to focus on improving the data set. Also I decided to augment/improve udacity's dataset before adding my own dataset, as udacity's dataset is clean and probably is the best driving behavior I can find.
 
 From inspection of Udacity's dataset, I find that quite a bit of the data are just going straight (steering angle of 0). The model needs to learn turning better, thus we need more data that contains non-zero steering angle.
 
