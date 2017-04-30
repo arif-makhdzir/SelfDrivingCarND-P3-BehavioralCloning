@@ -110,18 +110,25 @@ My first step was to use a convolution neural network model similar to the Comma
 I chose Comma.AI's model as it is a proven model that functions perfectly on a similar image input - in terms of size and features in the image.
 
 <h5>Preprocessing</h5>
-From experience past models and outlined in the lectures..
+First thing to do (as outlined in the lecture) is to normalize the images. This is done by adding a lambda layer that does the following operation: (x/255.0) - 0.5 (line 128)
 
 <h5>First training attempt and evaluation</h5>
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set, with 80/20 split. I trained my model with Udacity's dataset, using Adam Optimizer (lr=xxx) with batch size of 32 for 5 epochs. The end result is 0.2 loss on trainng set and 0.27 loss on validation set. I ran my model on the test track and it failed on second turn. I think in the first place the model is underfitting, I need the training set loss to be lower (less than 0.05).
+In order to gauge how well the model was working, I split my data set into training and validation set, with 80/20 split. I trained my model with Udacity's dataset, using Adam Optimizer (lr=0.0001) with batch size of 32 for 5 epochs. The end result was 0.2 loss on trainng set and 0.27 loss on validation set. I ran my model on the test track and it failed on the second turn. The model is underfitting, I need the training set loss to be lower (less than 0.05).
 
-From inspection of Udacity's dataset, I find that quite a bit of the data are just going straight (steering angle of 0). The model needs to learn turning better, thus we need more data that contains non zero steering angle.
+There are two ways to combat underfitting, one way is to have more useful data or to reduce the size of the model. The latter is not an option, as the model is of the right size for this problem, so I decided to focus on improving the data set.
+
+From inspection of Udacity's dataset, I find that quite a bit of the data are just going straight (steering angle of 0). The model needs to learn turning better, thus we need more data that contains non-zero steering angle.
 
 <h5>Adding left & right images data into the sample set</h5>
-Steering angle co-efficient table
+I augment the data by adding the left & right image data into the sample set. Now the question is what steering angle should I use for these images, to simulate a drive to center dataset? So I did a trial-and-error experiment below to find the best steering co-efficient:
 
-Test and failed on right turn
-data with minus steering coffecient
+| Steering angle co-efficient         		|     Observation of test track run	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| 0.229         		| Steering turning a bit too sharp, too gittery even when driving straight  							| 
+| 0.220     	| Model drives smoother on straight line, but fail to turn when corner too sharp 	|
+| 0.227					|	Best result, quite smooth on straight line yet still able to turn at sharp corner											|
+
+Result: Model is able to drive all left turn without problem, however when it encounters right turn it drives off the track. This means my model is not generalizing to turning right well-enough, so I need to augment/add more turning right data.
 
 <h5>Flip horizontal & drive reverse track</h5>
 
