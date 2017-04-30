@@ -52,6 +52,8 @@ My model is based on Comma.AI's end-to-end self driving car convolution neural n
 
 I chose Comma.AI's model as it is a proven model that functions perfectly on a similar image input - in terms of size and features in the image.
 
+For the final model architecture, see next section.
+
 Pre-processing
 1. Cropping - Cut 70px top and 25px bottom. Rational: Unneeded area for learning, sky & hood, trees, make image smaller, faster training. and allow model to focus on what's important (the road & lines)
 2. Resize - Resize to 160x40. Make smaller faster to train, and fits into the comma.ai model
@@ -96,7 +98,9 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 
 <h4>4. Appropriate training data</h4>
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was chosen to keep the vehicle driving on the road. Firstly I combine Udacity's dataset with my own training data in order to come up with the final data set.
+
+For my own training data, I used mainly a combination of center recovering from the left and right sides of the road and reverse track driving. These training data compliments Udacity's dataset well. 
 
 For details about how I created the training data, see the next section. 
 
@@ -109,6 +113,8 @@ My first step was to use a convolution neural network model similar to the Comma
 
 I chose Comma.AI's model as it is a proven model that functions perfectly on a similar image input - in terms of size and features in the image.
 
+Note that Comma.AI's model already has dropout layers, so I just copy them and use the same keep probability hyperparameter
+
 <h5>Preprocessing</h5>
 First thing to do (as outlined in the lecture) is to normalize the images. This is done by adding a lambda layer that does the following operation: (x/255.0) - 0.5 (line 128)
 
@@ -119,7 +125,9 @@ There are two ways to combat underfitting, one way is to have more useful data o
 
 From inspection of Udacity's dataset, I find that quite a bit of the data are just going straight (steering angle of 0). The model needs to learn turning better, thus we need more data that contains non-zero steering angle.
 
-<h5>Adding left & right images data into the sample set</h5>
+I used a couple of strategy to add more non-zero steering angle data:
+
+<h5>1. Adding left & right images data into the sample set</h5>
 I augment the data by adding the left & right image data into the sample set. Now the question is what steering angle should I use for these images, to simulate a drive to center dataset? So I did a trial-and-error experiment below to find the best steering co-efficient:
 
 | Steering angle co-efficient         		|     Observation of test track run	        					| 
@@ -129,6 +137,9 @@ I augment the data by adding the left & right image data into the sample set. No
 | 0.227					|	Best result, quite smooth on straight line yet still able to turn at sharp corner											|
 
 Result: Model is able to drive all left turn without problem, however when it encounters right turn it drives off the track. This means my model is not generalizing to turning right well-enough, so I need to augment/add more turning right data.
+
+<h5>2. Adding traning data of center recovering from the left and right sides of the road</h5>
+These data helps..
 
 <h5>Flip horizontal & drive reverse track</h5>
 1. Flip horizontal
@@ -157,24 +168,22 @@ The final model architecture (model.py lines 18-24) consisted of a convolution n
 
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| Input         		| 32x32x3 RGB image   							| 
-| Convolution 5x5     	| 1x1 stride, valid padding, outputs 28x28x6 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 14x14x6 				|
-| Convolution 5x5     	| 1x1 stride, valid padding, outputs 10x10x16 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 5x5x6 				|
-| Flatten	      	| Output = 400 				|
-| Fully connected		| Output = 120        									|
-| RELU					|												|
+| Input         		| 160x40x3 RGB image   							| 
+| Convolution 8x8     	| 4x4 stride, same padding, depth of 16 	|
+| ELU					|												|
+| Convolution 5x5     	| 2x2 stride, same padding, depth of 32 	|
+| ELU					|												|
+| Convolution 5x5     	| 2x2 stride, same padding, depth of 64 	|
+| Flatten	      	|  				|
+| Dropout		| Keep probability = 0.2       									|
+| ELU					|				|
+| Fully connected		| Output = 512        									|
+| Dropout		| Keep probability = 0.5       									|
+| ELU					|		
 | Dropout	| Keep probability = 0.5        									|
-| Fully connected		| Output = 84        									|
-| RELU					|												|
-| Dropout	| Keep probability = 0.5        									|
-| Fully connected		| Output = 43       									|
+| Fully connected		| Output = 1       									| Output = 43       									|
 | Softmax				|  
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
 
 ![alt text][image1]
 
