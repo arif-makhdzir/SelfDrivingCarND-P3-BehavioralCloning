@@ -158,25 +158,24 @@ To capture good driving behavior, I first recorded two laps on track one using c
 
 I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recover if it strays from center of the lane. These images show what a recovery looks like starting from right side :
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+<img src="writeup_images/offcenter_driving.jpg">
+<img src="writeup_images/return_center_driving.jpg">
 
 I also do reverse track driving to get more right turn data.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+To augment the data sat, I also flipped images and angles thinking so that the model will generalize better to both left and right turn. For example, here is an image that has then been flipped:
 
-![alt text][image6]
-![alt text][image7]
+<img src="writeup_images/turn_left_image.png">
+<img src="writeup_images/flipped_turn_left_image.png">
 
 Etc ....
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+After the collection process, I had 1287 number of data points. I then preprocessed this data, please look at pre-process section above.
 
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
+I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 5 as more than that the validation set lost oscilate which means it will only cause the model to overfit. I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
 
 
