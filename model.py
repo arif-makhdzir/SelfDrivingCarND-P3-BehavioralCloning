@@ -14,15 +14,10 @@ from keras.layers import Dense, Dropout, Activation, Flatten, SpatialDropout2D, 
 from keras.layers import Convolution2D, MaxPooling2D, Cropping2D
 from keras.layers.core import Lambda
 
-#from keras.optimizers import SGD, Adam, RMSprop
 from keras.optimizers import Adam
 from keras.utils import np_utils
 
-#from keras.callbacks import ModelCheckpoint
-#from keras.models import model_from_json
-
-sample_set = []
-
+######## 1. Helper functions ##########
 def add_csv_to_sample_set(filepath, sample_set):
     with open(filepath) as csv_file:
         first_line = True
@@ -36,18 +31,22 @@ def add_csv_to_sample_set(filepath, sample_set):
     
     return sample_set
 
-#sample_set = add_csv_to_sample_set('mydata/driving_log.csv', sample_set)    
-sample_set = add_csv_to_sample_set('data/driving_log.csv', sample_set)
+#This is a helper function to find the proper full image path because of discrepency between
+#udacity's data image path and simulator generated data image path
+def get_image_name(input_image_path):
+    image_name = 'invalid'
 
-training_set, validation_set = train_test_split(sample_set, test_size=0.1)
+    if 'home' not in input_image_path:
+        image_name = './data/'+input_image_path
+    else:
+        image_name = input_image_path
 
-print("length: " + str(len(sample_set)))
-print(sample_set[0])
+    return image_name
 
 def generator(input_set, batch_size=32):
     num_samples = len(input_set)
     
-    while True: # Loop forever so the generator never terminates
+    while True: 
         shuffle(input_set)
         for offset in range(0, num_samples, batch_size):
             batch_samples = input_set[offset:offset+batch_size]
@@ -55,17 +54,15 @@ def generator(input_set, batch_size=32):
             images = []
             angles = []
             count  = 0
+
             for batch_sample in batch_samples:
              
-                name = 'test'
-                if 'home' not in batch_sample[0]:
-                    name = './data/'+batch_sample[0]
-                else:
-                    name = batch_sample[0]
-           
-                center_image = mpimg.imread(name)
+                center_name  = get_image_name(batch_sample[0])
+                center_image = mpimg.imread(center_name)
                 center_angle = float(batch_sample[3])
 
+                #For every odd frame, flip image and make steering angle negative
+                #to simulate right turn. 
                 if count % 2 == 0:
                     center_image = np.fliplr(center_image)
                     center_angle = -1*center_angle
@@ -73,25 +70,17 @@ def generator(input_set, batch_size=32):
                 images.append(center_image)
                 angles.append(center_angle)
 
-                name_left = 'test'
-                if 'home' not in batch_sample[1]:
-                    name_left = './data/'+batch_sample[1].strip()
-                else:
-                    name_left = batch_sample[1].strip()
-                #name_left = './data/'+batch_sample[1].strip()
+                #Add left camera image with steering angle to simulate return to center
+                name_left  = get_image_name( batch_sample[1].strip() )
                 left_image = mpimg.imread(name_left)
-                left_angle = float(batch_sample[3]) +  0.229
+                left_angle = float(batch_sample[3]) +  0.230
                 images.append(left_image)
                 angles.append(left_angle)
 
-                name_right = 'test'
-                if 'home' not in batch_sample[2]:
-                    name_right = './data/'+batch_sample[2].strip()
-                else:
-                    name_right = batch_sample[2].strip()
-                #name_right = './data/'+batch_sample[2].strip()
+                #Add right camera image with steering angle to simulate return to center
+                name_right  = get_image_name( batch_sample[2].strip() )
                 right_image = mpimg.imread(name_right)
-                right_angle = float(batch_sample[3]) -  0.229
+                right_angle = float(batch_sample[3]) -  0.230
                 images.append(right_image)
                 angles.append(right_angle)
 
@@ -102,75 +91,67 @@ def generator(input_set, batch_size=32):
             
             yield shuffle(X_train, y_train)
 
-train_generator      = generator(training_set, batch_size=32)
-validation_generator = generator(validation_set, batch_size=32)
-
-def resize_comma(image):
-    import tensorflow as tf  # This import is required here otherwise the model cannot be loaded in drive.py
+def resize_image(image):
+    import tensorflow as tf 
     return tf.image.resize_images(image, (40, 160))
 
+######## Helper functions end ##########
 
-## 3. Model (data preprocessing incorporated into model)
+sample_set = []
 
-# Model adapted from Comma.ai model
+# 1. Add udacity's data and my data to sample set and split them into training & test set
+sample_set = add_csv_to_sample_set('mydata/driving_log.csv', sample_set)    
+sample_set = add_csv_to_sample_set('data/driving_log.csv', sample_set)
 
+print("sample set amount of data: " + str(len(sample_set)))
+
+training_set, validation_set = train_test_split(sample_set, test_size=0.1)
+
+
+# 2. Model definition
 model = Sequential()
+#Crop 25 pix from bottom and 70 pix from top to filter out unneeded areas of image for training
+model.add(Cropping2D(cropping=((70, 25), (0, 0)), dim_ordering='tf', input_shape=(160, 320, 3)))
 
-# Crop 70 pixels from the top of the image and 25 from the bottom
-model.add(Cropping2D(cropping=((70, 25), (0, 0)),
-                     dim_ordering='tf', # default
-                     input_shape=(160, 320, 3)))
+#Resize to 160 x 40
+model.add(Lambda(resize_image))
 
-# Resize the data
-model.add(Lambda(resize_comma))
-
-# Normalise the data
+# Normalisation
 model.add(Lambda(lambda x: (x/255.0) - 0.5))
 
-# Conv layer 1
+# NOTE: Model is copied from ai.comma's model that can be found here: https://github.com/commaai/research/blob/master/train_steering_model.py
 model.add(Convolution2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
 model.add(ELU())
-
-# Conv layer 2
 model.add(Convolution2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
 model.add(ELU())
-
-# Conv layer 3
 model.add(Convolution2D(64, 5, 5, subsample=(2, 2), border_mode="same"))
-
 model.add(Flatten())
 model.add(Dropout(.2))
 model.add(ELU())
-
-# Fully connected layer 1
 model.add(Dense(512))
 model.add(Dropout(.5))
 model.add(ELU())
-
-# Fully connected layer 2
 model.add(Dense(50))
 model.add(ELU())
-
 model.add(Dense(1))
 
 
-## Compile
+# 3. Compile
 adam = Adam(lr=0.0001)
 model.compile(optimizer=adam, loss="mse", metrics=['accuracy'])
 
-print("Model summary:\n", model.summary())
+# 4. Model training
+batch_size = 32
+nb_epoch   = 7
 
-## 4. Train model
-batch_size = 128
-nb_epoch = 3
+training_set_generator   = generator(training_set, batch_size=batch_size)
+validation_set_generator = generator(validation_set, batch_size=batch_size)
 
-# Train model using generator
-model.fit_generator(train_generator, 
-	            samples_per_epoch=len(training_set), 
-	            validation_data=validation_generator,
+model.fit_generator(training_set_generator,  
+	            validation_data=validation_set_generator,
+	            samples_per_epoch=len(training_set),
 	            nb_val_samples=len(validation_set), nb_epoch=nb_epoch)
-	            #callbacks=[checkpointer])
 
-## Save model
+# 5. Save the model
 model.save('model.h5')
 
