@@ -106,7 +106,6 @@ print("sample set amount of data: " + str(len(sample_set)))
 
 training_set, validation_set = train_test_split(sample_set, test_size=0.1)
 
-
 # 2. Model definition
 model = Sequential()
 #Crop 20 pix from bottom and 70 pix from top to filter out unneeded areas of image for training
@@ -134,7 +133,6 @@ model.add(Dense(50))
 model.add(ELU())
 model.add(Dense(1))
 
-
 # 3. Compile
 adam = Adam(lr=0.0001)
 model.compile(optimizer=adam, loss="mse", metrics=['accuracy'])
@@ -153,4 +151,3 @@ model.fit_generator(training_set_generator,
 
 # 5. Save the model
 model.save('model.h5')
-
