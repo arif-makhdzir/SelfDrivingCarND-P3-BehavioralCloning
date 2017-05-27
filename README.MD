@@ -95,7 +95,7 @@ I augment the data by adding the left & right image data into the sample set. No
 Result: Model is able to drive all left turn without problem, however when it encounters right turn it drives off the track. This means my model is not generalizing to turning right well-enough, so I need to augment/add more turning right data.
 
 <h5>2. Adding traning data of center recovering from the left and right sides of the road</h5>
-These data helps..
+See section 3 below for more elaboration on this.
 
 <h5>Flip horizontal & drive reverse track</h5>
 1. Flip horizontal
