@@ -1,21 +1,20 @@
+#Generic imports
 import os
 import csv
-import cv2
-
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import numpy as np
+
+#TF & sklearn imports
 import tensorflow as tf 
-from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
+from sklearn.model_selection import train_test_split
 
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten, SpatialDropout2D, ELU
-from keras.layers import Convolution2D, MaxPooling2D, Cropping2D
+#Keras imports
 from keras.layers.core import Lambda
-
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation, Flatten, SpatialDropout2D, ELU, Convolution2D, MaxPooling2D, Cropping2D
 from keras.optimizers import Adam
-from keras.utils import np_utils
 
 ######## 1. Helper functions ##########
 def add_csv_to_sample_set(filepath, sample_set):
@@ -43,13 +42,13 @@ def get_image_name(input_image_path):
 
     return image_name
 
-def generator(input_set, batch_size=32):
-    num_samples = len(input_set)
+def data_generator(input_data, batch_size=32):
+    num_samples = len(input_data)
     
     while True: 
-        shuffle(input_set)
+        shuffle(input_data)
         for offset in range(0, num_samples, batch_size):
-            batch_samples = input_set[offset:offset+batch_size]
+            batch_samples = input_data[offset:offset+batch_size]
 
             images = []
             angles = []
@@ -110,8 +109,8 @@ training_set, validation_set = train_test_split(sample_set, test_size=0.1)
 
 # 2. Model definition
 model = Sequential()
-#Crop 25 pix from bottom and 70 pix from top to filter out unneeded areas of image for training
-model.add(Cropping2D(cropping=((70, 25), (0, 0)), dim_ordering='tf', input_shape=(160, 320, 3)))
+#Crop 20 pix from bottom and 70 pix from top to filter out unneeded areas of image for training
+model.add(Cropping2D(cropping=((70, 20), (0, 0)), dim_ordering='tf', input_shape=(160, 320, 3)))
 
 #Resize to 160 x 40
 model.add(Lambda(resize_image))
@@ -144,8 +143,8 @@ model.compile(optimizer=adam, loss="mse", metrics=['accuracy'])
 batch_size = 32
 nb_epoch   = 7
 
-training_set_generator   = generator(training_set, batch_size=batch_size)
-validation_set_generator = generator(validation_set, batch_size=batch_size)
+training_set_generator   = data_generator(training_set, batch_size=batch_size)
+validation_set_generator = data_generator(validation_set, batch_size=batch_size)
 
 model.fit_generator(training_set_generator,  
 	            validation_data=validation_set_generator,
