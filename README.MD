@@ -67,7 +67,7 @@ I chose Comma.AI's model as it is a proven model that functions perfectly on a s
 Note that Comma.AI's model already has dropout layers, so I just copy them and use the same keep probability hyperparameter
 
 <h5>Preprocessing</h5>
-1. I crop the top of the image by 70px and bottom 25px. The reason to do is that those top and bottom areas of the image won't help with the model to learn how to steer the car (i.e. sky & hood, trees), so by cropping them out the model can focus on what's important: Just the road. The advatange of doing this is that it makes the images smaller, thus we will get faster training.
+1. I crop the top of the image by 70px and bottom 20px. The reason to do is that those top and bottom areas of the image won't help with the model to learn how to steer the car (i.e. sky & hood, trees), so by cropping them out the model can focus on what's important: Just the road. The advatange of doing this is that it makes the images smaller, thus we will get faster training.
 <img src="writeup_images/original_image.png">
 <img src="writeup_images/cropped_image.png">
 2. Then I resize the image to 160x40. The reason to do this is to speed up the training.
