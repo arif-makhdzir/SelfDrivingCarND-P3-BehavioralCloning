@@ -99,7 +99,7 @@ These data helps..
 
 <h5>Flip horizontal & drive reverse track</h5>
 1. Flip horizontal
-In order to augment the data to get more right turns, I flip the image horizontal for every odd frame and reverse the steering co-efficient sign (line xx).
+In order to augment the data to get more right turns, I flip the image horizontal for every odd frame and reverse the steering co-efficient sign (line 64-67).
 <img src="writeup_images/turn_left_image.png">
 <img src="writeup_images/flipped_turn_left_image.png">
 2. Drive reverse track
