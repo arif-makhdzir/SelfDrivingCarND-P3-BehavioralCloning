@@ -22,7 +22,7 @@ The goals / steps of this project are the following:
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
 ## Rubric Points
-###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
+### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
 ---
 <h4>Files Submitted & Code Quality</h4>
@@ -33,7 +33,7 @@ My project includes the following files:
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+* README.md summarizing the results
 
 <h4>2. Submission includes functional code</h4>
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
@@ -56,15 +56,15 @@ For the final model architecture, see next section.
 
 <h4>2. Attempts to reduce overfitting in the model</h4>
 
-i) The model contains dropout layers after the two fully connected layers in order to reduce overfitting (model.py lines 21). 
+i) The model contains dropout layers after the two fully connected layers in order to reduce overfitting (model.py lines 129 & 132). 
 
-ii) The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16 for training & validation set split). 
+ii) The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 108 for training & validation set split). 
 
-iii) The track is counter clockwise, so there are way more left turns than right turns. In order to combat the model from overfitting to left turn steering action, flip horizontal data augmentation technique was used and driving the track reverse to capture more right turn data was done.
+iii) The track is counter clockwise, so there are way more left turns than right turns. In order to combat the model from overfitting to left turn steering action, flip horizontal data augmentation technique was used and driving the track reverse to capture more right turn data was done (code line 66-68).
 
 <h4>3. Model parameter tuning</h4>
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 141).
 
 <h4>4. Appropriate training data</h4>
 
@@ -106,9 +106,9 @@ I augment the data by adding the left & right image data into the sample set. No
 
 | Steering angle co-efficient         		|     Observation of test track run	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| 0.229         		| Steering turning a bit too sharp, too gittery even when driving straight  							| 
-| 0.220     	| Model drives smoother on straight line, but fail to turn when corner too sharp 	|
-| 0.227					|	Best result, quite smooth on straight line yet still able to turn at sharp corner											|
+| 0.235         		| Steering turning a bit too sharp, too gittery even when driving straight  							| 
+| 0.225     	| Model drives smoother on straight line, but fail to turn when corner too sharp 	|
+| 0.230					|	Best result, quite smooth on straight line yet still able to turn at sharp corner											|
 
 Result: Model is able to drive all left turn without problem, however when it encounters right turn it drives off the track. This means my model is not generalizing to turning right well-enough, so I need to augment/add more turning right data.
 
@@ -127,7 +127,7 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 <h3>2. Final Model Architecture</h3>
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture (model.py lines 123-236) consisted of a convolution neural network with the following layers and layer sizes ...
 
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
@@ -147,14 +147,11 @@ The final model architecture (model.py lines 18-24) consisted of a convolution n
 | Fully connected		| Output = 1       									| Output = 43       									|
 | Softmax				|  
 
-
-![alt text][image1]
-
 <h3>3. Creation of the Training Set & Training Process</h3>
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
-![alt text][image2]
+<img src="writeup_images/original_image.png">
 
 I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recover if it strays from center of the lane. These images show what a recovery looks like starting from right side :
 
@@ -168,44 +165,8 @@ To augment the data sat, I also flipped images and angles thinking so that the m
 <img src="writeup_images/turn_left_image.png">
 <img src="writeup_images/flipped_turn_left_image.png">
 
-Etc ....
-
-After the collection process, I had 1287 number of data points. I then preprocessed this data, please look at pre-process section above.
-
+After the collection process, I had 11493 number of data points. I then preprocessed this data, please look at pre-process section above.
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 5 as more than that the validation set lost oscilate which means it will only cause the model to overfit. I used an adam optimizer so that manually training the learning rate wasn't necessary.
-
-
-
------------------
-Pre-processing
-1. Cropping - Cut 70px top and 25px bottom. Rational: Unneeded area for learning, sky & hood, trees, make image smaller, faster training. and allow model to focus on what's important (the road & lines)
-2. Resize - Resize to 160x40. Make smaller faster to train, and fits into the comma.ai model
-3. Normalized - (x/255.0) - 0.5 to get mean close to 0, make model learns better and faster.
-
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 160x40x3 RGB image   							| 
-| Convolution 8x8     	| 4x4 stride, same padding, depth of 16 	|
-| ELU					|												|
-| Convolution 5x5     	| 2x2 stride, same padding, depth of 32 	|
-| ELU					|												|
-| Convolution 5x5     	| 2x2 stride, same padding, depth of 64 	|
-| Flatten	      	|  				|
-| Dropout		| Keep probability = 0.2       									|
-| ELU					|				|
-| Fully connected		| Output = 512        									|
-| Dropout		| Keep probability = 0.5       									|
-| ELU					|		
-| Dropout	| Keep probability = 0.5        									|
-| Fully connected		| Output = 1       									|
-
-Augmentation
-1. Using left & right images - steering coefficient of 0.229(+/-). This helps the model to learn how to steer to middle when its off center, this fakes a situation of return to center from the side.
-2. Flip image horizontally on odd frame count - for every odd frame I flip image horizontally and change the sign of the steering angle. This helps the model to generalize to steering magnitude, not always turn left. generalize turning left & right. Since the track is counter clokwise with lots of left turns, required to learn right turn. Even though drive clockwise, still help to generalize.
-
-Driving strategy
-1. Off center move to center
-2. Drive reverse track, more right turn. problem first time turn right kelaut.
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 7 as more than that the validation set lost oscilate which means it will only cause the model to overfit. I used an adam optimizer so that manually training the learning rate wasn't necessary.
